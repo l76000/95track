@@ -1,196 +1,359 @@
 <!DOCTYPE html>
+
 <html lang="sr">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stanje Linije 95</title>
-    <style>
-     /* Global styles */
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Stanje Linije 95</title>
+
+    <style>
+
+     /* Global styles */
+
     body { 
+
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+
         background-color: #121212; 
+
         margin: 0; 
+
         padding: 20px; 
+
         color: #E0E0E0; 
+
     }
+
     
+
     .container { 
+
         max-width: 1000px; /* Increased max width for more space */
+
         margin: auto; 
+
         background: #1E1E1E; 
+
         padding: 30px; /* Increased container padding */
+
         border-radius: 8px; 
+
         box-shadow: 0 4px 15px rgba(0,0,0,0.3); /* Enhanced shadow */
+
     }
+
     
+
     h1 { 
+
         text-align: center; 
+
         color: #03DAC6; 
+
         margin-bottom: 5px; 
+
     }
+
     
+
     #last-updated { 
+
         text-align: center; 
+
         font-style: italic; 
+
         color: #BB86FC; /* Changed color for distinction */
+
         margin-bottom: 30px; 
+
         font-size: 1.1em; /* Slightly larger text */
+
     }
+
     
+
     #results-container { 
+
         border-top: 1px solid #333333; 
+
         padding-top: 10px; 
+
     }
+
     
+
     /* Grid Row Style - Increased Spacing */
+
     .result-item {
+
         display: grid;
+
         /* Kept column structure, adjusted relative sizes slightly */
+
         grid-template-columns: 1.2fr 1fr 1.3fr 1fr 1fr; 
+
         padding: 16px 12px; /* Increased vertical padding (top/bottom) */
+
         border-bottom: 1px solid #333333;
+
         font-size: 1.1em; /* Increased font size for readability */
+
         align-items: center;
+
         gap: 25px; /* Significantly increased space between columns */
+
     }
+
     
+
     /* Header Style */
+
     .result-header {
+
         font-weight: bold;
+
         color: #03DAC6; /* Header color */
+
         font-size: 1.15em; /* Larger header text */
+
         border-bottom: 2px solid #03DAC6;
+
         padding-bottom: 10px; /* More space under the header line */
+
     }
+
     
+
     /* Individual Column Styles */
+
     .result-item .block { 
+
         font-weight: bold;
+
         color: #E0E0E0;
+
     } 
+
     
+
     .result-item .vehicle { 
+
         color: #03DAC6; /* Primary bus ID color */
+
         font-weight: bold;
+
     }
+
     
+
     .result-item .time { 
+
         color: #BDBDBD; 
+
         font-size: 0.9em; 
+
         white-space: nowrap; /* Prevents time from wrapping */
+
     }
+
     
+
     /* Style for replacements */
+
     .result-item .replacement { 
+
         color: #CF6679; 
+
         font-weight: bold; 
+
     }
+
     
+
     .loading { 
+
         text-align: center; 
+
         font-size: 1.4em; /* Larger loading text */
+
         color: #03DAC6; 
+
         padding: 40px; 
+
     }
 
+    </style>
 
-
-
-
-    </style>
 </head>
+
 <body>
-    <div class="container">
-        <h1>Linija 95 po polascima</h1>
-        <div id="last-updated">Učitavanje...</div>
-        
-        <div id="results-container">
-            <div class="loading">Učitavam podatke...</div>
-        </div>
-    </div>
 
-    <script>
+    <div class="container">
 
-    // Funkcija za povlačenje i prikaz podataka
-    async function fetchAndRenderResults() {
-        const resultsContainer = document.getElementById('results-container');
-        const lastUpdatedEl = document.getElementById('last-updated');
-        resultsContainer.innerHTML = '<div class="loading">Učitavam sveže podatke...</div>';
+        <h1>Linija 95 po polascima</h1>
 
-        try {
-            // Pozivamo isti API, ali on sada čita iz Google Sheeta
-            const response = await fetch('/api/95');
-            if (!response.ok) {
-                throw new Error('Server nije odgovorio.');
-            }
-            
-            const data = await response.json();
-            const results = data.results;
-
-            const updatedTime = new Date(data.lastUpdated).toLocaleTimeString('sr-RS'); // Dodata lokalizacija
-            lastUpdatedEl.textContent = `Podaci sa servera ažurirani u: ${updatedTime}`;
-            resultsContainer.innerHTML = ''; // Čistimo kontejner
-
-            if (results.length === 0) {
-                resultsContainer.innerHTML = '<div class="loading">Još uvek nema podataka za danas.</div>';
-                return;
-            }
-
-            // AŽURIRANO: Dodajemo zaglavlje tabele sa korigovanim nazivom Vreme Polaska
-            const header = document.createElement('div');
-            header.className = 'result-item result-header';
-            header.innerHTML = `
-                <span>Polazak</span>
-                <span>Vozilo</span>
-                <span>Vreme Polaska</span> <span>Zamena 1</span>
-                <span>Zamena 2</span>
-            `;
-            resultsContainer.appendChild(header);
-
-            // AŽURIRANO: Prikazujemo sve podatke, sa pravilnim redosledom kolona
-            results.forEach(result => {
-                const item = document.createElement('div');
-                item.className = 'result-item';
-                
-                // Logika za prikaz zamena
-                const zamena1HTML = result.zamena1 ? `<span class="replacement">${result.zamena1}</span>` : `<span>-</span>`;
-                const zamena2HTML = result.zamena2 ? `<span class="replacement">${result.zamena2}</span>` : `<span>-</span>`;
-
-                item.innerHTML = `
-                    <span class="block">Polazak: ${result.block}</span>
-                    <span class="vehicle">${result.vehicle}</span>
-                    <span class="time">(${result.time})</span> ${zamena1HTML}
-                    ${zamena2HTML}
-                `;
-                resultsContainer.appendChild(item);
-            });
+        <div id="last-updated">Učitavanje...</div>
 
         
-           } catch (error) {
-    console.error('Greška:', error);
-    // ZAMENITE:
-    // resultsContainer.innerHTML = '<div class="loading" style="color: red;">Greška prilikom učitavanja podataka. Proverite konzolu.</div>';
-    
-    // SA NOVIM:
-    resultsContainer.innerHTML = '<div class="loading error-message">Greška prilikom učitavanja podataka. Proverite konzolu.</div>';
-}
+
+        <div id="results-container">
+
+            <div class="loading">Učitavam podatke...</div>
+
+        </div>
+
+    </div>
+
+
+
+    <script>
+
+
+
+    // Funkcija za povlačenje i prikaz podataka
+
+    async function fetchAndRenderResults() {
+
+        const resultsContainer = document.getElementById('results-container');
+
+        const lastUpdatedEl = document.getElementById('last-updated');
+
+        resultsContainer.innerHTML = '<div class="loading">Učitavam sveže podatke...</div>';
+
+
+
+        try {
+
+            // Pozivamo isti API, ali on sada čita iz Google Sheeta
+
+            const response = await fetch('/api/95');
+
+            if (!response.ok) {
+
+                throw new Error('Server nije odgovorio.');
+
+            }
+
+            
+
+            const data = await response.json();
+
+            const results = data.results;
+
+
+
+            const updatedTime = new Date(data.lastUpdated).toLocaleTimeString('sr-RS'); // Dodata lokalizacija
+
+            lastUpdatedEl.textContent = `Podaci sa servera ažurirani u: ${updatedTime}`;
+
+            resultsContainer.innerHTML = ''; // Čistimo kontejner
+
+
+
+            if (results.length === 0) {
+
+                resultsContainer.innerHTML = '<div class="loading">Još uvek nema podataka za danas.</div>';
+
+                return;
+
+            }
+
+
+
+            // AŽURIRANO: Dodajemo zaglavlje tabele sa korigovanim nazivom Vreme Polaska
+
+            const header = document.createElement('div');
+
+            header.className = 'result-item result-header';
+
+            header.innerHTML = `
+
+                <span>Polazak</span>
+
+                <span>Vozilo</span>
+
+                <span>Vreme Polaska</span> <span>Zamena 1</span>
+
+                <span>Zamena 2</span>
+
+            `;
+
+            resultsContainer.appendChild(header);
+
+
+
+            // AŽURIRANO: Prikazujemo sve podatke, sa pravilnim redosledom kolona
+
+            results.forEach(result => {
+
+                const item = document.createElement('div');
+
+                item.className = 'result-item';
+
+                
+
+                // Logika za prikaz zamena
+
+                const zamena1HTML = result.zamena1 ? `<span class="replacement">${result.zamena1}</span>` : `<span>-</span>`;
+
+                const zamena2HTML = result.zamena2 ? `<span class="replacement">${result.zamena2}</span>` : `<span>-</span>`;
+
+
+
+                item.innerHTML = `
+
+                    <span class="block">Polazak: ${result.block}</span>
+
+                    <span class="vehicle">${result.vehicle}</span>
+
+                    <span class="time">(${result.time})</span> ${zamena1HTML}
+
+                    ${zamena2HTML}
+
+                `;
+
+                resultsContainer.appendChild(item);
+
+            });
+
+
+
+        } catch (error) {
+
+            console.error('Greška:', error);
+
+            resultsContainer.innerHTML = '<div class="loading" style="color: red;">Greška prilikom učitavanja podataka. Proverite konzolu.</div>';
+
         }
+
     }
 
+
+
     // Učitaj podatke odmah kad se stranica otvori
+
     fetchAndRenderResults();
+
     
+
     // Automatsko osvežavanje na svakih 60 sekundi
+
     setInterval(fetchAndRenderResults, 60000); // 60 sekundi
 
 
 
-    </script>
-    <center><p>Napomena: Prikazana su sva vozila koja su na trasi i prijavljena na polazak. Vozila na okretnici nisu prikazana.</p></center>
+
+
+
+
+    </script>
+
+    <center><p>Napomena: Prikazana su sva vozila koja su na trasi i prijavljena na polazak. Vozila na okretnici nisu prikazana.</p></center>
+
 </body>
+
 </html>
-
-
-
-
-
