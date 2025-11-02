@@ -542,7 +542,7 @@ export async function runUpdateAndReturnData() {
                     const zamena1 = row.get('Zamena 1');
                     const zamena2 = row.get('Zamena 2');
 
-                *utils.js*_     // Da li je ovo novo vozilo koje već nismo videli?
+                _utils.js_     // Da li je ovo novo vozilo koje već nismo videli?
                     const isNewVehicle = (vehicle != mainVehicle) && (vehicle != zamena1) && (vehicle != zamena2);
 
                     if (isNewVehicle) {
