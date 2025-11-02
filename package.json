@@ -1,17 +1,8 @@
 {
   "name": "95track",
   "version": "1.0.0",
-  "description": "",
-  "type": "module",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^2.6.0",
     "google-spreadsheet": "^4.1.1"
   }
 }
