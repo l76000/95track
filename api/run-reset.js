@@ -12,9 +12,9 @@ export default async function handler(request, response) {
         
         // 2. (Opciono, ali preporučeno) Osiguraj da zaglavlja ostanu
         await sheet.setHeaderRow([
-            'Broj polaska', 
+            'Brojpolaska', 
             'Vozilo', 
-            'Vreme polaska', 
+            'Vremepolaska', 
             'Zamena 1', 
             'Zamena 2'
         ]);
