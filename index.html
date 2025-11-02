@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stanje Linije 95</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #333; }
+        #last-updated { text-align: center; font-style: italic; color: #777; margin-bottom: 20px; }
+        #results-container { border-top: 1px solid #eee; padding-top: 20px; }
+        .result-item {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 1.1em;
+            align-items: center;
+        }
+        .result-item:nth-child(even) { background-color: #f9f9f9; }
+        .result-item .block { font-weight: bold; }
+        .result-item .vehicle { color: #005a9c; }
+        .result-item .time { color: #555; font-size: 0.9em; }
+        .loading { text-align: center; font-size: 1.2em; color: #888; padding: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Linija 95 po polascima</h1>
+        <div id="last-updated">Učitavanje...</div>
+        
+        <div id="results-container">
+            <div class="loading">Učitavam podatke...</div>
+        </div>
+    </div>
+
+    <script>
+        // Funkcija za povlačenje i prikaz podataka
+        async function fetchAndRenderResults() {
+            const resultsContainer = document.getElementById('results-container');
+            const lastUpdatedEl = document.getElementById('last-updated');
+            resultsContainer.innerHTML = '<div class="loading">Učitavam sveže podatke...</div>';
+
+            try {
+                // POZIVAMO NAŠU API FUNKCIJU
+                const response = await fetch('/api/get-data'); 
+                if (!response.ok) {
+                    throw new Error('Server nije odgovorio.');
+                }
+                
+                const data = await response.json();
+                const results = data.results;
+
+                const updatedTime = new Date(data.lastUpdated).toLocaleTimeString();
+                lastUpdatedEl.textContent = `Podaci ažurirani u: ${updatedTime}`;
+                resultsContainer.innerHTML = ''; // Čistimo kontejner
+
+                if (results.length === 0) {
+                    resultsContainer.innerHTML = '<div class="loading">Nema aktivnih polazaka koji se poklapaju sa redom vožnje.</div>';
+                    return;
+                }
+
+                results.forEach(result => {
+                    const item = document.createElement('div');
+                    item.className = 'result-item';
+                    item.innerHTML = `
+                        <span class="block">Blok: ${result.block}</span>
+                        <span class="vehicle">Vozilo: ${result.vehicle}</span>
+                        <span class="time">(Polazak u ${result.time})</span>
+                    `;
+                    resultsContainer.appendChild(item);
+                });
+
+            } catch (error) {
+                console.error('Greška:', error);
+                resultsContainer.innerHTML = '<div class="loading" style="color: red;">Greška prilikom učitavanja podataka. Proverite konzolu.</div>';
+            }
+        }
+
+        // Učitaj podatke odmah kad se stranica otvori
+        fetchAndRenderResults();
+        
+        // Nema potrebe za intervalom, korisnik može sam da osveži (F5)
+        // stranicu da dobije najnovije podatke.
+
+    </script>
+</body>
+</html>
