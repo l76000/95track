@@ -1,12 +1,12 @@
 {
-  "crons": [
-    {
-      "path": "/api/run-update",
-      "schedule": "*/30 2-23 * * *"
-    },
-    {
-      "path": "/api/run-reset",
-      "schedule": "0 1 * * *"
-    }
-  ]
+    "crons": [
+        {
+            "path": "/api/run-update",
+            "schedule": "*/30 2-23 * * *"
+        },
+        {
+            "path": "/api/run-reset",
+            "schedule": "0 1 * * *"
+        }
+    ]
 }
