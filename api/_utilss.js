@@ -495,12 +495,12 @@ export async function runUpdateAndReturnData() {
                 const time = bus.time;
 
                 // Nađi da li polazak (block) već postoji u sheet-u
-                const row = existingRows.find(r => r.get('Brojpolaska') == block);
+                const row = existingRows.find(r => r.get('Broj Polaska') == block);
 
                 if (!row) {
                     // SLUČAJ 1: Polazak ne postoji. Dodaj ga.
                     // Proveravamo da li je već u baferu za dodavanje
-                    if (!rowsToAdd.find(r => r['Brojpolaska'] == block)) {
+                    if (!rowsToAdd.find(r => r['Broj Polaska'] == block)) {
                         rowsToAdd.push({
                             'Broj Polaska': block,
                             'Broj Vozila': vehicle,
@@ -509,7 +509,7 @@ export async function runUpdateAndReturnData() {
                     }
                 } else {
                     // SLUČAJ 2: Polazak postoji. Proveri da li je vozilo isto.
-                    const mainVehicle = row.get('Vozilo');
+                    const mainVehicle = row.get('Broj Vozila');
                     const zamena1 = row.get('Zamena1');
                     const zamena2 = row.get('Zamena2');
 
