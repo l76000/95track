@@ -92,6 +92,15 @@
         color: #03DAC6; 
         padding: 40px; 
     }
+
+
+/* NOVI CSS ZA PRIKAZ GREŠKE */
+.loading.error-message {  
+    color: #CF6679 !important; /* Crvena boja iz Vaše palete za grešku */
+    font-weight: bold;
+}
+
+</style>
     </style>
 </head>
 <body>
@@ -162,7 +171,14 @@
 
         } catch (error) {
             console.error('Greška:', error);
-            resultsContainer.innerHTML = '<div class="loading" style="color: red;">Greška prilikom učitavanja podataka. Proverite konzolu.</div>';
+           } catch (error) {
+    console.error('Greška:', error);
+    // ZAMENITE:
+    // resultsContainer.innerHTML = '<div class="loading" style="color: red;">Greška prilikom učitavanja podataka. Proverite konzolu.</div>';
+    
+    // SA NOVIM:
+    resultsContainer.innerHTML = '<div class="loading error-message">Greška prilikom učitavanja podataka. Proverite konzolu.</div>';
+}
         }
     }
 
@@ -178,5 +194,6 @@
     <center><p>Napomena: Prikazana su sva vozila koja su na trasi i prijavljena na polazak. Vozila na okretnici nisu prikazana.</p></center>
 </body>
 </html>
+
 
 
