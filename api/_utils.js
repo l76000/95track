@@ -500,7 +500,7 @@ export async function fetchPrometkoData() {
 }
 
 
-// --- 4. GLAVNA LOGIKA AŽURIRANJA (NOVA) ---
+// --- 4. GLAVNA LOGIKA AŽURIRANJA (IZMENJENA) ---
 // Ovu funkciju pozivaju i api/95.js i api/run-update.js
 
 export async function runUpdateAndReturnData() {
@@ -540,16 +540,21 @@ export async function runUpdateAndReturnData() {
                     const mainVehicle = row.get('Vozilo');
                     const zamena1 = row.get('Zamena 1');
                     const zamena2 = row.get('Zamena 2');
-                   const zamena3 = row.get('Zamena 3');
+                    const zamena3 = row.get('Zamena 3');
 
-                    // Da li je ovo novo vozilo koje već nismo videli?
-                   const isNewVehicle = 
-    (vehicle != mainVehicle) && 
-    (vehicle != zamena1) && 
-    (vehicle != zamena2) && 
-    (vehicle != zamena3);
+                    // --- POČETAK IZMENE ---
+                    
+                    // 1. Nađi poslednje aktivno vozilo u Sheet-u
+                    let lastActiveVehicle = mainVehicle;
+                    if (zamena1) lastActiveVehicle = zamena1;
+                    if (zamena2) lastActiveVehicle = zamena2;
+                    if (zamena3) lastActiveVehicle = zamena3;
 
-                    if (isNewVehicle) {
+                    // 2. Proveri da li je vozilo sa API-ja RAZLIČITO od poslednjeg aktivnog
+                    const isADifferentVehicle = (vehicle != lastActiveVehicle);
+
+                    if (isADifferentVehicle) {
+                        // 3. Ako jeste, dodaj ga u prvu slobodnu kolonu zamene
                         if (!zamena1) {
                             row.set('Zamena 1', vehicle);
                             rowsToUpdate.push(row.save()); // Sačuvaj izmenu
@@ -560,7 +565,9 @@ export async function runUpdateAndReturnData() {
                             row.set('Zamena 3', vehicle);
                             rowsToUpdate.push(row.save()); // Sačuvaj izmenu
                         }
+                        // Ako su sve 3 zamene popunjene, ignorišemo (ili možeš dodati logiku za Zamena 4, itd.)
                     }
+                    // --- KRAJ IZMENE ---
                 }
             }
         }
@@ -585,7 +592,7 @@ export async function runUpdateAndReturnData() {
             time: row.get('Vremepolaska'),
             zamena1: row.get('Zamena 1') || null,
             zamena2: row.get('Zamena 2') || null,
-           zamena3: row.get('Zamena 3') || null,
+            zamena3: row.get('Zamena 3') || null,
         }));
         
         // Sortiraj po broju polaska (kao integer)
@@ -596,4 +603,4 @@ export async function runUpdateAndReturnData() {
         console.error("Greška u runUpdateAndReturnData:", error);
         throw error; // Prosledi grešku
     }
-                                        }
+}
