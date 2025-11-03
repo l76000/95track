@@ -3,7 +3,7 @@
 <html lang="sr">
 
 <head>
-
+<meta name="viewport" content="width=device-width">
     <meta charset="UTF-8">
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -94,7 +94,7 @@
 
         /* Kept column structure, adjusted relative sizes slightly */
 
-        grid-template-columns: 1.2fr 1fr 1.3fr 1fr 1fr; 
+        grid-template-columns: 1.2fr 1fr 1.3fr 1fr 1fr 1fr; 
 
         padding: 16px 12px; /* Increased vertical padding (top/bottom) */
 
@@ -276,9 +276,12 @@
 
                 <span>Vozilo</span>
 
-                <span>Vreme Polaska</span> <span>Zamena 1</span>
+                <span>Vreme Polaska</span> 
+                <span>Zamena 1</span>
 
                 <span>Zamena 2</span>
+                
+                 <span>Zamena 3</span>
 
             `;
 
@@ -302,6 +305,8 @@
 
                 const zamena2HTML = result.zamena2 ? `<span class="replacement">${result.zamena2}</span>` : `<span>-</span>`;
 
+                 const zamena3HTML = result.zamena3 ? `<span class="replacement">${result.zamena3}</span>` : `<span>-</span>`;
+
 
 
                 item.innerHTML = `
@@ -313,6 +318,8 @@
                     <span class="time">(${result.time})</span> ${zamena1HTML}
 
                     ${zamena2HTML}
+                    
+                     ${zamena3HTML}
 
                 `;
 
@@ -354,10 +361,11 @@
 
 
     <center><strong><p>U koloni "Vozilo" prikazano je vozilo koje je bilo prvobitno na polasku.</p></strong></center>
-    <center><strong><p>U kolonama "Zamena 1" i "Zamena 2" prikazane su zamene za to vozilo, i ukoliko vozila postoje u tim kolonama, to su trenutno aktivna vozila, koja su zamenila vozilo u koloni "Vozilo".</p></strong></center>
+    <center><strong><p>U kolonama "Zamena 1" , "Zamena 2" i "Zamena 3" prikazane su zamene za to vozilo, i ukoliko vozila postoje u tim kolonama, to su trenutno aktivna vozila, koja su zamenila vozilo u koloni "Vozilo".</p></strong></center>
 
 </body>
 
 </html>
+
 
 
