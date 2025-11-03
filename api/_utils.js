@@ -5,7 +5,7 @@ import { JWT } from 'google-auth-library';
 // --- 1. KOMPLETAN RED VOŽNJE ---
 // !!! OVDE KOPIRAJTE VAŠE KOMPLETNE MAPE !!!
 const timetableMapA = {
-   "04:45:00": 24,
+   "04:45:00": 24,
 "05:00:00": 28,
 "05:10:00": 30,
 "05:20:00": 31,
@@ -216,7 +216,7 @@ const timetableMapA = {
 "00:35:00": 24,
 };
 const timetableMapB = {
-    "04:00:00": 1,
+    "04:00:00": 1,
 "04:20:00": 5,
 "04:35:00": 7,
 "04:50:00": 9,
@@ -420,16 +420,16 @@ const timetableMapB = {
 
 // !!! OVDE KOPIRAJTE VAŠU KOMPLETNU LISTU URL-OVA !!!
 const URLS = [
-    { url: "https://beograd.prometko.si/api/stations/arrivals?station=21238", timetable: timetableMapA },
-    { url: "https://beograd.prometko.si/api/stations/arrivals?station=21260", timetable: timetableMapA },
-    { url: "https://beograd.prometko.si/api/stations/arrivals?station=20354", timetable: timetableMapA },
-    { url: "https://beograd.prometko.si/api/stations/arrivals?station=20119", timetable: timetableMapA },
-    { url: "https://beograd.prometko.si/api/stations/arrivals?station=20790", timetable: timetableMapA },
-    { url: "https://beograd.prometko.si/api/stations/arrivals?station=20783", timetable: timetableMapB },
-    { url: "https://beograd.prometko.si/api/stations/arrivals?station=20795", timetable: timetableMapB },
-    { url: "https://beograd.prometko.si/api/stations/arrivals?station=20359", timetable: timetableMapB },
-    { url: "https://beograd.prometko.si/api/stations/arrivals?station=20348", timetable: timetableMapB },
-    { url: "https://beograd.prometko.si/api/stations/arrivals?station=21255", timetable: timetableMapB },
+    { url: "https://beograd.prometko.si/api/stations/arrivals?station=21238", timetable: timetableMapA },
+    { url: "https://beograd.prometko.si/api/stations/arrivals?station=21260", timetable: timetableMapA },
+    { url: "https://beograd.prometko.si/api/stations/arrivals?station=20354", timetable: timetableMapA },
+    { url: "https://beograd.prometko.si/api/stations/arrivals?station=20119", timetable: timetableMapA },
+    { url: "https://beograd.prometko.si/api/stations/arrivals?station=20790", timetable: timetableMapA },
+    { url: "https://beograd.prometko.si/api/stations/arrivals?station=20783", timetable: timetableMapB },
+    { url: "https://beograd.prometko.si/api/stations/arrivals?station=20795", timetable: timetableMapB },
+    { url: "https://beograd.prometko.si/api/stations/arrivals?station=20359", timetable: timetableMapB },
+    { url: "https://beograd.prometko.si/api/stations/arrivals?station=20348", timetable: timetableMapB },
+    { url: "https://beograd.prometko.si/api/stations/arrivals?station=21255", timetable: timetableMapB },
 ];
 const CLEAN_REGEX = /[^\d:.]/g;
 
@@ -437,67 +437,67 @@ const CLEAN_REGEX = /[^\d:.]/g;
 
 // Autentifikacija
 const serviceAccountAuth = new JWT({
-    email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-    key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'), // Popravka za Vercel
-    scopes: [
-        'https://www.googleapis.com/auth/spreadsheets',
-    ],
+    email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+    key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'), // Popravka za Vercel
+    scopes: [
+        'https://www.googleapis.com/auth/spreadsheets',
+    ],
 });
 
 // Funkcija za učitavanje Sheeta
 export async function loadSheet() {
-    const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID, serviceAccountAuth);
-    await doc.loadInfo();
-    return doc.sheetsByIndex[0]; // Vraća prvi (i jedini) sheet
+    const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID, serviceAccountAuth);
+    await doc.loadInfo();
+    return doc.sheetsByIndex[0]; // Vraća prvi (i jedini) sheet
 }
 
 // --- 3. LOGIKA ZA PROMETKO API ---
 
 // Funkcija koja povlači sve podatke sa Prometko
 export async function fetchPrometkoData() {
-    let allResults = [];
-    
-    for (const { url, timetable } of URLS) {
-        try {
-            const apiResponse = await fetch(url);
-            if (!apiResponse.ok) continue;
-            
-            const data = await apiResponse.json();
-            const arrivals = data.data && data.data.arrivals ? data.data.arrivals : null;
-            if (!arrivals || arrivals.length === 0) continue;
+    let allResults = [];
+    
+    for (const { url, timetable } of URLS) {
+        try {
+            const apiResponse = await fetch(url);
+            if (!apiResponse.ok) continue;
+            
+            const data = await apiResponse.json();
+            const arrivals = data.data && data.data.arrivals ? data.data.arrivals : null;
+            if (!arrivals || arrivals.length === 0) continue;
 
-            arrivals
-                .filter((bus) => bus.lc === "95")
-                .forEach((bus) => {
-                    const vehicleId = bus.i;
-                    let apiTime = bus.dt;
-                    if (!apiTime) return;
+            arrivals
+                .filter((bus) => bus.lc === "95")
+                .forEach((bus) => {
+                    const vehicleId = bus.i;
+                    let apiTime = bus.dt;
+                    if (!apiTime) return;
 
-                    apiTime = apiTime.trim().replace(CLEAN_REGEX, '');
-                    if (apiTime.includes('.')) apiTime = apiTime.split('.')[0];
-                    if (apiTime.length === 5 && apiTime.includes(':')) apiTime = apiTime + ":00";
-                    
-                    const blockNumber = timetable[apiTime];
+                    apiTime = apiTime.trim().replace(CLEAN_REGEX, '');
+                    if (apiTime.includes('.')) apiTime = apiTime.split('.')[0];
+                    if (apiTime.length === 5 && apiTime.includes(':')) apiTime = apiTime + ":00";
+                    
+                    const blockNumber = timetable[apiTime];
 
-                    if (blockNumber) {
-                        allResults.push({
-                            time: apiTime,
-                            block: blockNumber,
-                            vehicle: vehicleId,
-                        });
-                    }
-                });
-        } catch (error) {
-            console.error(`Greška pri dohvatanju ${url}:`, error.message);
-        }
-    }
+                    if (blockNumber) {
+                        allResults.push({
+                            time: apiTime,
+                            block: blockNumber,
+                            vehicle: vehicleId,
+                        });
+                    }
+                });
+        } catch (error) {
+            console.error(`Greška pri dohvatanju ${url}:`, error.message);
+        }
+    }
 
-    // Filtriranje
-    const uniqueResults = allResults.filter((item, index, self) =>
-        index === self.findIndex((t) => (t.block === item.block && t.vehicle === item.vehicle))
-    );
-    
-    return uniqueResults;
+    // Filtriranje
+    const uniqueResults = allResults.filter((item, index, self) =>
+        index === self.findIndex((t) => (t.block === item.block && t.vehicle === item.vehicle))
+    );
+    
+    return uniqueResults;
 }
 
 
@@ -505,96 +505,54 @@ export async function fetchPrometkoData() {
 // Ovu funkciju pozivaju i api/95.js i api/run-update.js
 
 export async function runUpdateAndReturnData() {
-    // 1. Povuci sveže podatke sa Prometko API-ja
-    const freshBuses = await fetchPrometkoData();
-    
-    try {
-        // 2. Učitaj Google Sheet i sve postojeće redove
-        const sheet = await loadSheet();
-        const existingRows = await sheet.getRows();
+    // 1. Povuci sveže podatke sa Prometko API-ja
+    const freshBuses = await fetchPrometkoData();
+    
+    try {
+        // 2. Učitaj Google Sheet i sve postojeće redove
+        const sheet = await loadSheet();
+        const existingRows = await sheet.getRows();
 
-        let rowsToAdd = []; 
-        let rowsToUpdate = [];
+        let rowsToAdd = []; 
+        let rowsToUpdate = [];
 
-        // 3. Logika za upoređivanje (samo ako Prometko ima podatke)
-        if (freshBuses && freshBuses.length > 0) {
-            for (const bus of freshBuses) {
-                const block = bus.block;
-                const vehicle = bus.vehicle;
-                const time = bus.time;
+        // 3. Logika za upoređivanje (samo ako Prometko ima podatke)
+        if (freshBuses && freshBuses.length > 0) {
+            for (const bus of freshBuses) {
+                const block = bus.block;
+                const vehicle = bus.vehicle;
+                const time = bus.time;
 
-                // Nađi da li polazak (block) već postoji u sheet-u
-                const row = existingRows.find(r => r.get('Brojpolaska') == block);
+                // PAŽNJA: Koristimo 'Brojpolaska' umesto 'Broj Polaska'
+                const row = existingRows.find(r => r.get('Brojpolaska') == block);
 
-                if (!row) {
-                    // SLUČAJ 1: Polazak ne postoji. Dodaj ga.
-                    // Proveravamo da li je već u baferu za dodavanje
-                    if (!rowsToAdd.find(r => r['Brojpolaska'] == block)) {
-                        rowsToAdd.push({
-                            'Brojpolaska': block,
-                            'Vozilo': vehicle,
-                            'Vremepolaska': time,
-                        });
-                    }
-                } else {
-                    // SLUČAJ 2: Polazak postoji. Proveri da li je vozilo isto.
-                    const mainVehicle = row.get('Vozilo');
-                    const zamena1 = row.get('Zamena 1');
-                    const zamena2 = row.get('Zamena 2');
-                   const zamena3 = row.get('Zamena 3');
+                if (!row) {
+                    // SLUČAJ 1: Polazak ne postoji. Dodaj ga.
+                    // Proveravamo da li je već u baferu za dodavanje
+                    if (!rowsToAdd.find(r => r['Brojpolaska'] == block)) {
+                        rowsToAdd.push({
+                            'Brojpolaska': block,
+                            'Vozilo': vehicle,
+                            'Vremepolaska': time,
+                            'Zamena 1': '',
+                            'Zamena 2': '',
+                            'Zamena 3': '',
+                        });
+                    }
+                } else {
+                    // SLUČAJ 2: Polazak postoji. Proveri da li je vozilo novo/vraćeno.
+                    const mainVehicle = row.get('Vozilo');
+                    // PAŽNJA: Koristimo 'Zamena 1', 'Zamena 2', 'Zamena 3'
+                    const zamena1 = row.get('Zamena 1');
+                    const zamena2 = row.get('Zamena 2');
+                    const zamena3 = row.get('Zamena 3');
 
-                    // Da li je ovo novo vozilo koje već nismo videli?
-                   const isNewVehicle = 
-    (vehicle != mainVehicle) && 
-    (vehicle != zamena1) && 
-    (vehicle != zamena2) && 
-    (vehicle != zamena3);
+                    // Provera da li je vozilo NEPOZNATO u kolonama Zamena
+                    const isUnknownInZamena = 
+                        (vehicle != zamena1) &&
+                        (vehicle != zamena2) &&
+                        (vehicle != zamena3);
 
-                    if (isNewVehicle) {
-                        if (!zamena1) {
-                            row.set('Zamena 1', vehicle);
-                            rowsToUpdate.push(row.save()); // Sačuvaj izmenu
-                        } else if (!zamena2) {
-                            row.set('Zamena 2', vehicle);
-                            rowsToUpdate.push(row.save()); // Sačuvaj izmenu
-                        } else if (!zamena3) {
-                            row.set('Zamena 3', vehicle);
-                            rowsToUpdate.push(row.save()); // Sačuvaj izmenu
-                        }
-                    }
-                }
-            }
-        }
-
-        // 4. Snimi izmene u Sheet
-        if (rowsToAdd.length > 0) {
-            await sheet.addRows(rowsToAdd);
-        }
-        if (rowsToUpdate.length > 0) {
-            await Promise.all(rowsToUpdate);
-        }
-        
-        // 5. Ponovo učitaj sheet da dobiješ 100% sveže podatke
-        // (Ovo je neophodno ako su dodati novi redovi)
-        const updatedSheet = await loadSheet();
-        const finalRows = await updatedSheet.getRows();
-
-        // 6. Formatiraj i VRATI podatke
-        const results = finalRows.map(row => ({
-            block: row.get('Brojpolaska'),
-            vehicle: row.get('Vozilo'),
-            time: row.get('Vremepolaska'),
-            zamena1: row.get('Zamena 1') || null,
-            zamena2: row.get('Zamena 2') || null,
-           zamena3: row.get('Zamena 3') || null,
-        }));
-        
-        // Sortiraj po broju polaska (kao integer)
-        results.sort((a, b) => parseInt(a.block) - parseInt(b.block));
-        return results;
-
-    } catch (error) {
-        console.error("Greška u runUpdateAndReturnData:", error);
-        throw error; // Prosledi grešku
-    }
-}
+                    // A. Da li je ovo potpuno novo vozilo (koje nije ni glavno ni u zamenama)?
+                    const isNewReplacementVehicle = 
+                        (vehicle != mainVehicle
